@@ -45,13 +45,16 @@ class ItemList extends StatelessWidget {
         if (!snapshot.hasData) return new Text('Loading...');
         return new ListView(
           children: snapshot.data.documents.map((document) {
-            return new ListTile(
-              title: new Text(document['Item name']),
-              subtitle: new Text(document['Date Added'].toString() + " (" + document['Fridge'] + ")"),
+            return new ExpansionTile(
               leading: Icon(
                 Icons.face,
                 color: Colors.red[500],
               ),
+              title: new Text(document['Item name']),
+              children: <Widget>[
+              new Text(document['Date Added'].toString() + " (" + document['Fridge'] + ")",
+              textScaleFactor: 1.2,),
+            ],
             );
           }).toList(),
         );
