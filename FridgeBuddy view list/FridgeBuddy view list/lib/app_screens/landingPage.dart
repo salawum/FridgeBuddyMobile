@@ -11,7 +11,7 @@ class LoadScreen extends StatelessWidget{
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            new Text("FridgeBuddy", style: new TextStyle(color: Colors.white, fontSize: 60.0, fontWeight: FontWeight.bold),),
+            new Text("FridgeBuddy", textScaleFactor: 4 , style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           ],
         ),
       ),
