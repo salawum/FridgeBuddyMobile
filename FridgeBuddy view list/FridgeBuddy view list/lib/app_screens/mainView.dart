@@ -14,6 +14,7 @@ class MainView extends StatelessWidget {
       title: 'View List',
       theme: new ThemeData(
         primarySwatch: Colors.blue,
+        brightness: Brightness.dark,
         inputDecorationTheme: InputDecorationTheme(
           hintStyle: TextStyle(
             color: Colors.white,
@@ -120,17 +121,17 @@ class ItemList extends StatelessWidget {
         return new ListView(
           children: snapshot.data.documents.map((document) {
             return new ExpansionTile(
-              title: new Text(document['Item name'], textScaleFactor: 1.0),
+              leading: Icon(
+                Icons.fastfood,
+                color: Colors.blue[700],
+              ),
+              title: new Text(document['Item name'], textScaleFactor: 1.0, textAlign: TextAlign.left,),
               children: <Widget>[
                 ItemInfo(str: document['Date Added'].toString(), iconImage: Icons.access_time,),
                 ItemInfo(str: document['Fridge'].toString(), iconImage: Icons.camera_rear,),
                 ItemInfo(str:document['Quantity'].toString(), iconImage: Icons.format_list_numbered,),
                 ItemInfo(str:document['Donator'].toString(), iconImage: Icons.home,),
               ],
-              leading: Icon(
-                Icons.fastfood,
-                color: Colors.blue[700],
-              ),
             );
           }).toList(),
         );
@@ -149,20 +150,24 @@ class ItemInfo extends StatelessWidget
   Widget build(BuildContext context)
   {
     double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
     return new Container(
-      padding: EdgeInsets.symmetric(horizontal: width * 0.2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          new Container(
-            child: new Icon(
-              iconImage,
-              color: Colors.blue[200],
+      padding: EdgeInsets.only(bottom: height * 0.01),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: width * 0.2),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            new Container(
+              child: new Icon(
+                iconImage,
+                color: Colors.blue[200],
+              ),
+              padding: EdgeInsets.symmetric(horizontal: width * 0.05),
             ),
-            padding: EdgeInsets.symmetric(horizontal: width * 0.05),
-          ),
-          new Text(str, textScaleFactor: 1.0,),
-        ],
+            new Text(str, textScaleFactor: 1.0,),
+          ],
+        ),
       ),
     );
   }
