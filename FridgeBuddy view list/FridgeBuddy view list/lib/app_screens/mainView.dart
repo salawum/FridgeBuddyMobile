@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import './favouritesList.dart';
+import './settings.dart';
 
 final _textEditControl = TextEditingController();
 final _focus = FocusNode();
+List<ExpansionTile> favouriteItems = <ExpansionTile>[];
 
 BuildContext context;
 
@@ -11,7 +14,7 @@ class MainView extends StatelessWidget {
   Widget build(BuildContext context) {
     return new MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'View List',
+      title: "View List",
       theme: new ThemeData(
         primarySwatch: Colors.blue,
         brightness: Brightness.dark,
@@ -106,7 +109,34 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         )
-      )
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        //onTap: onTabTapped, // new
+        currentIndex: 0, // new
+        items: [
+          new BottomNavigationBarItem(
+            icon: IconButton(
+              icon: Icon(Icons.view_list),
+              onPressed: () {},
+            ),
+            title: Text("View Items"),
+          ),
+          new BottomNavigationBarItem(
+            icon: IconButton(
+              icon: Icon(Icons.view_headline),
+              onPressed: ()=> Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new FavouritesList())),
+            ),
+            title: Text("Favourites List"),
+          ),
+          new BottomNavigationBarItem(
+            icon: IconButton(
+              icon: Icon(Icons.settings),
+              onPressed: ()=> Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new Settings())),
+            ),
+            title: Text("Settings"),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -131,6 +161,39 @@ class ItemList extends StatelessWidget {
                 ItemInfo(str: document['Fridge'].toString(), iconImage: Icons.camera_rear,),
                 ItemInfo(str:document['Quantity'].toString(), iconImage: Icons.format_list_numbered,),
                 ItemInfo(str:document['Donator'].toString(), iconImage: Icons.home,),
+                FlatButton(
+                  child: Text(
+                    "Add to Favourites",
+                    textScaleFactor: 1.2,
+                  ),
+                  color: Colors.blue[700],
+                  onPressed: (){
+                    print("oof");
+                    favouriteItems.add(
+                      ExpansionTile(
+                        title: new Text(document['Item name'], textScaleFactor: 1.0, textAlign: TextAlign.left,),
+                        children: <Widget>[
+                          ItemInfo(str: document['Date Added'].toString(), iconImage: Icons.access_time,),
+                          ItemInfo(str: document['Fridge'].toString(), iconImage: Icons.camera_rear,),
+                          ItemInfo(str:document['Quantity'].toString(), iconImage: Icons.format_list_numbered,),
+                          ItemInfo(str:document['Donator'].toString(), iconImage: Icons.home,),
+                          FlatButton(
+                            child: Text(
+                              "Remove from Favourites",
+                              textScaleFactor: 1.2,
+                            ),
+                            color: Colors.blue[700],
+                            onPressed: () {
+                              print("oof");
+                              favouriteItems.removeWhere((item) => item.title.toString().contains(document['Item name']));
+                              Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new FavouritesList()));
+                            },
+                          ),
+                        ],
+                      )
+                    );
+                  }
+                ),
               ],
             );
           }).toList(),
@@ -140,8 +203,16 @@ class ItemList extends StatelessWidget {
   }
 }
 
-class ItemInfo extends StatelessWidget
-{
+class FavouriteItem extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new ListView(
+      children: favouriteItems.toList(),
+    );
+  }
+}
+
+class ItemInfo extends StatelessWidget {
   const ItemInfo({this.str,this.iconImage});
 
   final String str;
