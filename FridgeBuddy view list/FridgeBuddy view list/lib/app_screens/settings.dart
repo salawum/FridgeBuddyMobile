@@ -61,7 +61,7 @@ class _AppSettingsState extends State<AppSettings> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Text(
-                      "General Notifications",
+                      "General Notifications        ",
                       textScaleFactor: 1.2,
                     ),
                     Switch(
@@ -103,6 +103,22 @@ class _AppSettingsState extends State<AppSettings> {
                   "Got any feedback?",
                   textScaleFactor: 1.2,
                   //textAlign: TextAlign.left,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: height * 0.02),
+                child: TextField(
+                  autofocus: false,
+                  keyboardType: TextInputType.multiline,
+                  maxLength: 280,
+                  autocorrect: true,
+                  maxLines: null,
+                  textAlign: TextAlign.center,
+                  controller: _feedbackBugs, //_feedback.text would hold the string value
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "Message...",
+                  ),
                 ),
               ),
               Column(
@@ -160,7 +176,7 @@ class _AppSettingsState extends State<AppSettings> {
                         ),
                       ),
                       Text(
-                        "App Feedback",
+                        "App Feedback             ",
                         textScaleFactor: 1.2,
                       ),
                     ],
@@ -177,7 +193,10 @@ class _AppSettingsState extends State<AppSettings> {
                   textScaleFactor: 1.2,
                 ),
                 color: Colors.blue[700],
-                onPressed: () {},
+                onPressed: (){
+                  print(_feedbackBugs.text);
+                  _feedbackBugs.text = "";
+                }
               ),
             ],
           ),
