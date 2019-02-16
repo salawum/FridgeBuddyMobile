@@ -41,32 +41,27 @@ class FavouritesList extends StatelessWidget {
           ),
         ),
         body: new FavouriteItem(),
-        bottomNavigationBar: BottomNavigationBar(
-          //onTap: onTabTapped, // new
-          currentIndex: 1, // new
-          items: [
-            new BottomNavigationBarItem(
-              icon: IconButton(
+        bottomNavigationBar: BottomAppBar(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              new IconButton(
                 icon: Icon(Icons.view_list),
                 onPressed: ()=> Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new MainView())),
               ),
-              title: Text("View Items",),
-            ),
-            new BottomNavigationBarItem(
-              icon: IconButton(
-                icon: Icon(Icons.view_headline),
+              new IconButton(
+                icon: Icon(
+                  Icons.view_headline,
+                  color: Colors.greenAccent,
+                ),
                 onPressed: () {},
               ),
-              title: Text("Favourites List"),
-            ),
-            new BottomNavigationBarItem(
-              icon: IconButton(
+              new IconButton(
                 icon: Icon(Icons.settings),
                 onPressed: ()=> Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new Settings())),
               ),
-              title: Text("Settings"),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     }

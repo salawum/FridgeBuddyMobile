@@ -44,35 +44,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(context) {
     double height = MediaQuery.of(context).size.height;
     return new Scaffold(
-      appBar: new AppBar(
-        leading: new IconButton(
-          icon: Icon(
-          Icons.search,
-          ),
-        onPressed: () => FocusScope.of(context).requestFocus(_focus)
-        ),
-        actions:[
-          Builder(
-            builder: (context) => IconButton(
-              icon: Icon(Icons.filter_list),
-              onPressed: () => Scaffold.of(context).openEndDrawer(),
-              tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-            ),
-          ),
-        ],
-        title: new TextField(
-          autofocus: false,
-          focusNode: _focus,
-          style: new TextStyle(
-            color: Colors.white,
-          ),
-          controller: _textEditControl, //holds the value for the input for text
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: "Search...",
-          ),
-        ),
-      ),
+      //appBar: new CustomAppBar(),
+
+
       body: new ItemList(),
       endDrawer: Drawer(
         child: ListView(
@@ -110,32 +84,27 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         )
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        //onTap: onTabTapped, // new
-        currentIndex: 0, // new
-        items: [
-          new BottomNavigationBarItem(
-            icon: IconButton(
-              icon: Icon(Icons.view_list),
+      bottomNavigationBar: BottomAppBar(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            new IconButton(
+              icon: Icon(
+                Icons.view_list,
+                color: Colors.greenAccent,
+              ),
               onPressed: () {},
             ),
-            title: Text("View Items"),
-          ),
-          new BottomNavigationBarItem(
-            icon: IconButton(
+            new IconButton(
               icon: Icon(Icons.view_headline),
               onPressed: ()=> Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new FavouritesList())),
             ),
-            title: Text("Favourites List"),
-          ),
-          new BottomNavigationBarItem(
-            icon: IconButton(
+            new IconButton(
               icon: Icon(Icons.settings),
               onPressed: ()=> Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new Settings())),
             ),
-            title: Text("Settings"),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -171,12 +140,13 @@ class ItemList extends StatelessWidget {
                     print("oof");
                     favouriteItems.add(
                       ExpansionTile(
+                        leading: Icon(
+                          Icons.fastfood,
+                          color: Colors.blue[700],
+                        ),
                         title: new Text(document['Item name'], textScaleFactor: 1.0, textAlign: TextAlign.left,),
                         children: <Widget>[
-                          ItemInfo(str: document['Date Added'].toString(), iconImage: Icons.access_time,),
-                          ItemInfo(str: document['Fridge'].toString(), iconImage: Icons.camera_rear,),
-                          ItemInfo(str:document['Quantity'].toString(), iconImage: Icons.format_list_numbered,),
-                          ItemInfo(str:document['Donator'].toString(), iconImage: Icons.home,),
+                          ItemInfo(str: document['Donator'].toString(), iconImage: Icons.home,),
                           FlatButton(
                             child: Text(
                               "Remove from Favourites",
@@ -238,6 +208,45 @@ class ItemInfo extends StatelessWidget {
             ),
             new Text(str, textScaleFactor: 1.0,),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class CustomAppBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context)
+  {
+    //double width = MediaQuery.of(context).size.width;
+    //double height = MediaQuery.of(context).size.height;
+    return new AppBar(
+      leading: new IconButton(
+        icon: Icon(
+          Icons.search,
+        ),
+        //onPressed: () => FocusScope.of(context).requestFocus(_focus)
+        onPressed: () => print("kjb"),
+      ),
+      actions:[
+        Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.filter_list),
+            onPressed: () => Scaffold.of(context).openEndDrawer(),
+            tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+          ),
+        ),
+      ],
+      title: new TextField(
+        autofocus: false,
+        focusNode: _focus,
+        style: new TextStyle(
+          color: Colors.white,
+        ),
+        controller: _textEditControl, //holds the value for the input for text
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: "Search...",
         ),
       ),
     );
