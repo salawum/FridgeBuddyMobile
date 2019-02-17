@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import './favouritesList.dart';
 import './settings.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 final _textEditControl = TextEditingController();
 final _focus = FocusNode();
@@ -35,18 +36,50 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  final FirebaseMessaging _messaging = FirebaseMessaging();
   @override
   void initState() {
     super.initState();
+
+    _messaging.getToken().then((token) {
+      print(token);
+    });
   }
 
   @override
   Widget build(context) {
     double height = MediaQuery.of(context).size.height;
     return new Scaffold(
-      //appBar: new CustomAppBar(),
-
-
+      appBar: new AppBar(
+        leading: new IconButton(
+          icon: Icon(
+          Icons.search,
+          ),
+        onPressed: () => FocusScope.of(context).requestFocus(_focus)
+        ),
+        actions:[
+          Builder(
+            builder: (context) => IconButton(
+              icon: Icon(Icons.filter_list),
+              onPressed: () => Scaffold.of(context).openEndDrawer(),
+              tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+            ),
+          ),
+        ],
+        title: new TextField(
+          autofocus: false,
+          focusNode: _focus,
+          style: new TextStyle(
+            color: Colors.white,
+          ),
+          controller: _textEditControl, //holds the value for the input for text
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            hintText: "Search...",
+          ),
+        ),
+      ),
       body: new ItemList(),
       endDrawer: Drawer(
         child: ListView(
