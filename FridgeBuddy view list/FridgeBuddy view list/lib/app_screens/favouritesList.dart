@@ -1,0 +1,68 @@
+import 'package:flutter/material.dart';
+import './settings.dart';
+import './mainView.dart';
+
+class FavouritesList extends StatelessWidget {
+
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: "Favourites List",
+      theme: new ThemeData(
+        primarySwatch: Colors.blue,
+        brightness: Brightness.dark,
+        inputDecorationTheme: InputDecorationTheme(
+          hintStyle: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+      ),
+      home: new FavList(),
+    );
+  }
+}
+
+  class FavList extends StatefulWidget {
+  @override
+  _FavListState createState() => new _FavListState();
+  }
+
+  class _FavListState extends State<FavList> {
+
+    Widget build(BuildContext context)
+    {
+      //double height = MediaQuery.of(context).size.height;
+      return new Scaffold(
+        appBar: new AppBar(
+          title: Text("Favourites List",
+            style: TextStyle(
+              color: Colors.white,
+            ),
+          ),
+        ),
+        body: new FavouriteItem(),
+        bottomNavigationBar: BottomAppBar(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              new IconButton(
+                icon: Icon(Icons.view_list),
+                onPressed: ()=> Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new MainView())),
+              ),
+              new IconButton(
+                icon: Icon(
+                  Icons.view_headline,
+                  color: Colors.greenAccent,
+                ),
+                onPressed: () {},
+              ),
+              new IconButton(
+                icon: Icon(Icons.settings),
+                onPressed: ()=> Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new Settings())),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
