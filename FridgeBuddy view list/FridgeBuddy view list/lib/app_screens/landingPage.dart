@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import './mainView.dart';
 
 class LoadScreen extends StatelessWidget{
 
@@ -7,7 +6,7 @@ class LoadScreen extends StatelessWidget{
     return new Material(
       color: Colors.blueGrey,
       child: new InkWell(
-        onTap: ()=> Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new MainView())),
+        onTap: ()=> Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false),
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
