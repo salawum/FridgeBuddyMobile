@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'favouritesList.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -56,6 +55,21 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
     );
+  }
+
+  _saveFav(String name, int quantity) async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      prefs.setInt(name, quantity);
+    });
+  }
+
+  _loadFav(String name) async
+  {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int newVal = prefs.get(name);
+
+    return newVal;
   }
 
   @override
@@ -267,24 +281,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class ItemList extends StatelessWidget {
-
-  _saveFav(String name, int quantity) async{
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      prefs.setInt(name, quantity);
-    });
-  }
-
-  _loadFav(String name) async
-  {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    int newVal = prefs.get(name);
-
-    return newVal;
-  }
-
-  @override
+class ItemList extends StatelessWidget
+{
   Widget build(BuildContext context) {
     return new StreamBuilder(
       stream: Firestore.instance.collection('Items').snapshots(),
@@ -296,7 +294,7 @@ class ItemList extends StatelessWidget {
           );
         }
         return (!_searching)
-        ? ListView(
+            ? ListView(
           children: snapshot.data.documents.map((document) {
             return new ExpansionTile(
               leading: Icon(
@@ -309,95 +307,35 @@ class ItemList extends StatelessWidget {
                 ItemInfo(str: document['Fridge'].toString(), iconImage: Icons.camera_rear,),
                 ItemInfo(str:document['Quantity'].toString(), iconImage: Icons.camera_rear,), //remember to change
                 ItemInfo(str:document['Donator'].toString(), iconImage: Icons.home,),
-                FlatButton(
-                  child: Text(
-                    "Add to Favourites",
-                    textScaleFactor: 1.2,
-                  ),
-                  color: Colors.blue[700],
-                  onPressed: (){
-                    print("oof");
-                    favouriteItems.add(
-                        ListTile(
-                          leading: Icon(
-                            Icons.fastfood,
-                            color: Colors.blue[700],
-                          ),
-                          title: new Text(document['Item name'], textScaleFactor: 1.0, textAlign: TextAlign.left,),
-                          subtitle: new Text(document['Donator']+" "+document['Quantity'], textScaleFactor: 1.0, textAlign: TextAlign.left,),
-                          trailing: IconButton(
-                            icon: Icon(Icons.star),
-                            color: Colors.yellow,
-                            onPressed: () {
-                              print("foo");
-                              favouriteItems.removeWhere((item) => item.title.toString().contains(document['Item name']));
-                              //Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => FavList()));
-                              //Navigator.pop(context);
-                              Navigator.of(context).pushNamedAndRemoveUntil('/favList', (Route<dynamic> route) => false);
-                            },
-                          ),
-                        )
-                    );
-                  }
-                ),
               ],
             );
           }).toList(),
         )
-        : ListView(
+            : ListView(
           children: snapshot.data.documents.map((document) {
             if(document['Item name'].toString().toLowerCase().contains((_textEditControl.text).toLowerCase()) && _textEditControl.text.isNotEmpty)
-              {
-                print(_textEditControl.text);
-                print(document['Item name']);
-                return new ExpansionTile(
-                  leading: Icon(
-                    Icons.fastfood,
-                    color: Colors.blue[700],
-                  ),
-                  title: new Text(document['Item name'], textScaleFactor: 1.0, textAlign: TextAlign.left, style: TextStyle(color: Colors.red),),
-                  children: <Widget>[
-                    ItemInfo(str: document['Date Added'].toString(), iconImage: Icons.access_time,),
-                    ItemInfo(str: document['Fridge'].toString(), iconImage: Icons.camera_rear,),
-                    ItemInfo(str:document['Quantity'].toString(), iconImage: Icons.format_list_numbered,), //remember to change
-                    ItemInfo(str:document['Donator'].toString(), iconImage: Icons.home,),
-                    FlatButton(
-                      child: Text(
-                        "Add to Favourites",
-                        textScaleFactor: 1.2,
-                      ),
-                      color: Colors.blue[700],
-                      onPressed: (){
-                        print("oof");
-                        favouriteItems.add(
-                          ListTile(
-                            leading: Icon(
-                              Icons.fastfood,
-                              color: Colors.blue[700],
-                            ),
-                            title: new Text(document['Item name'], textScaleFactor: 1.0, textAlign: TextAlign.left,),
-                            subtitle: new Text(document['Donator']+" "+document['Quantity'], textScaleFactor: 1.0, textAlign: TextAlign.left,),
-                            trailing: IconButton(
-                              icon: Icon(Icons.star),
-                              color: Colors.blue[700],
-                              onPressed: () async {
-                                print("foo");
-                                favouriteItems.removeWhere((item) => item.title.toString() == (document['Item name']));
-                                Navigator.of(context).pushNamedAndRemoveUntil('/favList', (Route<dynamic> route) => false);
-                              },
-                            ),
-                          )
-                        );
-                      }
-                    ),
-                  ],
-                );
-              }else
-                {
-                  print("Not equal");
-                  Text empty = new Text("");
-                  return empty;
-                }
+            {
+              print(_textEditControl.text);
+              print(document['Item name']);
+              return new ExpansionTile(
+                leading: Icon(
+                  Icons.fastfood,
+                  color: Colors.blue[700],
+                ),
+                title: new Text(document['Item name'], textScaleFactor: 1.0, textAlign: TextAlign.left, style: TextStyle(color: Colors.red),),
+                children: <Widget>[
+                  ItemInfo(str: document['Date Added'].toString(), iconImage: Icons.access_time,),
+                  ItemInfo(str: document['Fridge'].toString(), iconImage: Icons.camera_rear,),
+                  ItemInfo(str:document['Quantity'].toString(), iconImage: Icons.format_list_numbered,), //remember to change
+                  ItemInfo(str:document['Donator'].toString(), iconImage: Icons.home,),
+                ],
+              );
+            }else
+            {
+              print("Not equal");
+              Text empty = new Text("");
+              return empty;
+            }
           }).toList(),
         );
       },
