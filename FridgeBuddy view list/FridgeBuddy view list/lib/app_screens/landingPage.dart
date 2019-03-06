@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class LoadScreen extends StatelessWidget{
 
   Widget build(BuildContext context) {
-    double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
     return new Material(
       color: Colors.blueGrey,
       child: new InkWell(
@@ -11,7 +11,7 @@ class LoadScreen extends StatelessWidget{
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            new Text("FridgeBuddy", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: height/12), textAlign: TextAlign.center,),
+            new Text("FridgeBuddy", style: new TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: width/7), textAlign: TextAlign.center,),
           ],
         ),
       ),

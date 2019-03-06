@@ -53,147 +53,188 @@ class _AppSettingsState extends State<AppSettings> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: width * 0.05),
+                  padding: EdgeInsets.only(top: width * 0.03, left: width * 0.1),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text(
-                        "General Notifications        ",
-                        textScaleFactor: 1.2,
+                        "General Notifications",
+                        style: TextStyle(
+                          fontSize: width/25,
+                        ),
                       ),
-                      Switch(
-                        value: _notificationValGlobal,
-                        onChanged: (bool newValue) {
-                          setState(() {
-                            _notificationValGlobal = newValue;
-                            print(_notificationValGlobal);
-                          });
-                        },
+                      Padding(
+                        padding: EdgeInsets.only(left: width * 0.325),
+                        child: Switch(
+                          value: _notificationValGlobal,
+                          onChanged: (bool newValue) {
+                            setState(() {
+                              _notificationValGlobal = newValue;
+                              print(_notificationValGlobal);
+                            });
+                          },
+                        ),
                       ),
                     ],
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: width * 0.04),
+                  padding: EdgeInsets.only(top: width * 0.03, left: width * 0.1),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    //mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       Text(
                         "Favourites List Notifications",
-                        textScaleFactor: 1.2,
+                          style: TextStyle(
+                            fontSize: width/25,
+                          ),
                       ),
-                      Switch(
-                        value: _notificationValFav,
-                        onChanged: (bool newValue) {
-                          setState(() {
-                            _notificationValFav = newValue;
-                            print(_notificationValFav);
-                          });
-                        },
+                      Padding(
+                        padding: EdgeInsets.only(left: width * 0.2),
+                        child: Switch(
+                          value: _notificationValFav,
+                          onChanged: (bool newValue) {
+                            setState(() {
+                              _notificationValFav = newValue;
+                              print(_notificationValFav);
+                            });
+                          },
+                        ),
                       ),
                     ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: width * 0.04),
-                  child: Text(
-                    "Got any feedback?",
-                    textScaleFactor: 1.2,
-                    //textAlign: TextAlign.left,
                   ),
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: height * 0.02),
-                  child: TextField(
-                    autofocus: false,
-                    keyboardType: TextInputType.multiline,
-                    maxLength: 280,
-                    autocorrect: true,
-                    maxLines: null,
-                    textAlign: TextAlign.center,
-                    controller: _feedbackBugs, //_feedback.text would hold the string value
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: "Message...",
+                  child: Text(
+                    "Got any feedback?",
+                    style: TextStyle(
+                      fontSize: width/25,
+                    ),
+                    //textAlign: TextAlign.left,
+                  ),
+                ),
+                TextField(
+                  autofocus: false,
+                  keyboardType: TextInputType.multiline,
+                  maxLength: 300,
+                  autocorrect: true,
+                  style: TextStyle(
+                    fontSize: width/25,
+                  ),
+                  maxLines: null,
+                  textAlign: TextAlign.center,
+                  controller: _feedbackBugs, //_feedback.text would hold the string value
+                  decoration: InputDecoration(
+                    counterStyle: TextStyle(
+                      fontSize: width/40,
+                    ),
+                    border: InputBorder.none,
+                    hintText: "Message...",
+                    hintStyle: TextStyle(
+                      fontSize: width/25,
                     ),
                   ),
                 ),
                 Column(
                   children: <Widget>[
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        Container(
-                          width: width * 0.05,
-                          height: height * 0.05,
-                          child: (_community)
-                              ? RawMaterialButton(
-                            shape: CircleBorder(),
-                            fillColor: Colors.blue,
-                            onPressed: () {},
-                          )
-                              : RawMaterialButton(
-                            shape: CircleBorder(),
-                            fillColor: Colors.grey,
-                            onPressed: () {
-                              setState(() {
-                                _community = !_community;
-                                _developers = false;
-                              });
-                            },
+                        Padding(
+                          padding: EdgeInsets.only(left: width/6),
+                          child: Container(
+                            width: width * 0.05,
+                            height: height * 0.05,
+                            child: (_community)
+                                ? RawMaterialButton(
+                              shape: CircleBorder(),
+                              fillColor: Colors.blue,
+                              onPressed: () {},
+                              )
+                                : RawMaterialButton(
+                              shape: CircleBorder(),
+                              fillColor: Colors.grey,
+                              onPressed: () {
+                                setState(() {
+                                  _community = !_community;
+                                  _developers = false;
+                                });
+                              },
+                            ),
                           ),
                         ),
-                        Text(
-                          "Community Fridge Feedback",
-                          textScaleFactor: 1.2,
+                        Padding(
+                          padding: EdgeInsets.only(left: width/12),
+                          child: Text(
+                            "Community Fridge Feedback",
+                            style: TextStyle(
+                              fontSize: width/25,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        Container(
-                          width: width * 0.05,
-                          height: height * 0.05,
-                          child: (_developers)
-                              ? RawMaterialButton(
-                            shape: CircleBorder(),
-                            fillColor: Colors.blue,
-                            onPressed: () {},
-                          )
-                              : RawMaterialButton(
-                            shape: CircleBorder(),
-                            fillColor: Colors.grey,
-                            onPressed: () {
-                              setState(() {
-                                _developers = !_developers;
-                                _community = false;
-                              });
-                            },
+                        Padding(
+                          padding: EdgeInsets.only(left: width/6),
+                          child: Container(
+                            width: width * 0.05,
+                            height: height * 0.05,
+                            child: (_developers)
+                                ? RawMaterialButton(
+                              shape: CircleBorder(),
+                              fillColor: Colors.blue,
+                              onPressed: () {},
+                            )
+                                : RawMaterialButton(
+                              shape: CircleBorder(),
+                              fillColor: Colors.grey,
+                              onPressed: () {
+                                setState(() {
+                                  _developers = !_developers;
+                                  _community = false;
+                                });
+                              },
+                            ),
                           ),
                         ),
-                        Text(
-                          "App Feedback             ",
-                          textScaleFactor: 1.2,
+                        Padding(
+                          padding: EdgeInsets.only(left: width/12),
+                          child: Text(
+                            "App Feedback",
+                              style: TextStyle(
+                                fontSize: width/25,
+                              ),
+                          ),
                         ),
                       ],
                     ),
                   ],
                 ),
-                FlatButton(
-                    child: Text(
-                      "Let us know",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.normal,
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: height/20),
+                  child: SizedBox(
+                    height: height/20,
+                    width: width/3,
+                    child: FlatButton(
+                      child: Text(
+                        "Let us know",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.normal,
+                          fontSize: width/25,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textScaleFactor: 1.2,
+                      color: Colors.blue[700],
+                      onPressed: (){
+                        print(_feedbackBugs.text);
+                        _feedbackBugs.text = "";
+                      }
                     ),
-                    color: Colors.blue[700],
-                    onPressed: (){
-                      print(_feedbackBugs.text);
-                      _feedbackBugs.text = "";
-                    }
+                  ),
                 ),
               ],
             ),
@@ -205,12 +246,14 @@ class _AppSettingsState extends State<AppSettings> {
             children: <Widget>[
               new IconButton(
                   icon: Icon(Icons.view_list),
+                  iconSize: width/15,
                   onPressed: () {
                     Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
                   }
               ),
               new IconButton(
-                  icon: Icon(Icons.view_headline),
+                  icon: Icon(Icons.star),
+                  iconSize: width/15,
                   onPressed: () {
                     Navigator.of(context).pushNamedAndRemoveUntil('/favList', (Route<dynamic> route) => false);
                   }
@@ -220,6 +263,7 @@ class _AppSettingsState extends State<AppSettings> {
                   Icons.settings,
                   color: Colors.greenAccent,
                 ),
+                iconSize: width/15,
                 onPressed: () {},
               ),
             ],

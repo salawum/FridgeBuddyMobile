@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
-import 'package:shared_preferences/shared_preferences.dart';
 
 final _textEditControl = TextEditingController();
 final _focus = FocusNode();
@@ -32,44 +31,42 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<bool> _onWillPop(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
     return showDialog(
       context: context,
       builder: (context) => new AlertDialog(
         title: new Text(
           "Are you sure?",
-          textScaleFactor: 1.2,
+          style: TextStyle(
+            fontSize: width/24,
+          ),
         ),
         content: new Text(
           "Do you want to exit FridgeBuddy?",
-          textScaleFactor: 0.9,
+          style: TextStyle(
+            fontSize: width/30,
+          ),
         ),
         actions: <Widget>[
           new FlatButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: new Text("No"),
+            child: new Text("No",
+              style: TextStyle(
+                fontSize: width/30,
+              ),
+            ),
           ),
           new FlatButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: new Text("Yes"),
+            child: new Text("Yes",
+              style: TextStyle(
+                fontSize: width/30,
+              ),
+            ),
           ),
         ],
       ),
     );
-  }
-
-  _saveFav(String name, int quantity) async{
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      prefs.setInt(name, quantity);
-    });
-  }
-
-  _loadFav(String name) async
-  {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    int newVal = prefs.get(name);
-
-    return newVal;
   }
 
   @override
@@ -116,12 +113,19 @@ class _MyHomePageState extends State<MyHomePage> {
                           focusNode: _focus,
                           style: new TextStyle(
                             color: Colors.white,
+                            fontSize: width/30,
                           ),
                           controller: _textEditControl, //holds the value for the input for text
                           decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.search),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              size: width/15,
+                            ),
                             border: InputBorder.none,
                             hintText: "Search...",
+                            hintStyle: new TextStyle(
+                              fontSize: width/30,
+                            ),
                           ),
                           onChanged: (searchText)
                           {
@@ -133,6 +137,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           flex: 2,
                           child: IconButton(
                             icon: Icon(Icons.close),
+                            iconSize: width/15,
                             onPressed: ()
                             {
                               setState(() {
@@ -171,7 +176,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           textScaleFactor: 2,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontWeight: FontWeight.bold
+                            fontWeight: FontWeight.bold,
+                            fontSize: width/28,
                           ),
                         ),
                       ),
@@ -179,6 +185,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         flex: 2,
                         child: IconButton(
                           icon: Icon(Icons.search),
+                          iconSize: width/12,
                           onPressed: ()
                           {
                             setState(() {
@@ -191,6 +198,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         flex: 2,
                         child: IconButton(
                           icon: Icon(Icons.filter_list),
+                          iconSize: width/12,
                           onPressed: ()
                           {
                             setState(() {
@@ -222,17 +230,26 @@ class _MyHomePageState extends State<MyHomePage> {
                     decoration: BoxDecoration (
                       color: Colors.blue,
                     ),
-                    child: Text("Search Filters",
-                      textScaleFactor: 1.5,
+                    child: Text(
+                      "Search Filters",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
+                        fontSize: width/15,
                       ),
                     ),
                   ),
                 ),
                 ListTile(
-                  title: Text("Sort by Fridge", textScaleFactor: 1.2),
+                  title: Padding(
+                    padding: EdgeInsets.symmetric(vertical: width/40),
+                    child: Text(
+                      "Sort by Fridge",
+                      style: TextStyle(
+                        fontSize: width/25,
+                      ),
+                    ),
+                  ),
                   onTap: () {
                     //stuff
                     //print(_textEditControl.text);
@@ -240,7 +257,15 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                 ),
                 ListTile(
-                  title: Text("Sort by Item Name", textScaleFactor: 1.2),
+                  title: Padding(
+                    padding: EdgeInsets.symmetric(vertical: width/40),
+                    child: Text(
+                      "Sort by Item Name",
+                      style: TextStyle(
+                        fontSize: width/25,
+                      ),
+                    ),
+                  ),
                   onTap: () {
                     //stuff
                     Navigator.pop(context);
@@ -259,16 +284,19 @@ class _MyHomePageState extends State<MyHomePage> {
                   Icons.view_list,
                   color: Colors.greenAccent,
                 ),
+                iconSize: width/15,
                 onPressed: () {},
               ),
               new IconButton(
-                  icon: Icon(Icons.view_headline),
+                  icon: Icon(Icons.star),
+                  iconSize: width/15,
                   onPressed: () {
                     Navigator.of(context).pushNamedAndRemoveUntil('/favList', (Route<dynamic> route) => false);
                   }
               ),
               new IconButton(
                   icon: Icon(Icons.settings),
+                  iconSize: width/15,
                   onPressed: () {
                     Navigator.of(context).pushNamedAndRemoveUntil('/settings', (Route<dynamic> route) => false);
                   }
@@ -284,30 +312,45 @@ class _MyHomePageState extends State<MyHomePage> {
 class ItemList extends StatelessWidget
 {
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
     return new StreamBuilder(
       stream: Firestore.instance.collection('Items').snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (!snapshot.hasData){
           return new Text('Loading...',
-            textScaleFactor: 1.0,
+            style: TextStyle(
+              fontSize: width/25,
+            ),
             textAlign: TextAlign.center,
           );
         }
         return (!_searching)
             ? ListView(
           children: snapshot.data.documents.map((document) {
-            return new ExpansionTile(
-              leading: Icon(
-                Icons.fastfood,
-                color: Colors.blue[700],
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: width/50),
+              child: new ExpansionTile(
+                leading: Icon(
+                  Icons.fastfood,
+                  color: Colors.blue[700],
+                  size: width/15,
+                ),
+                title: Padding(
+                  padding: EdgeInsets.only(left: width/50),
+                  child: new Text(document['Item name'],
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: width/25,
+                    ),
+                  ),
+                ),
+                children: <Widget>[
+                  ItemInfo(str: document['Date Added'].toString(), iconImage: Icons.access_time,),
+                  ItemInfo(str: document['Fridge'].toString(), iconImage: Icons.camera_rear,), //remember to change
+                  ItemInfo(str:document['Quantity'].toString(), iconImage: Icons.format_list_numbered,),
+                  ItemInfo(str:document['Donator'].toString(), iconImage: Icons.home,),
+                ],
               ),
-              title: new Text(document['Item name'], textScaleFactor: 1.0, textAlign: TextAlign.left,),
-              children: <Widget>[
-                ItemInfo(str: document['Date Added'].toString(), iconImage: Icons.access_time,),
-                ItemInfo(str: document['Fridge'].toString(), iconImage: Icons.camera_rear,),
-                ItemInfo(str:document['Quantity'].toString(), iconImage: Icons.camera_rear,), //remember to change
-                ItemInfo(str:document['Donator'].toString(), iconImage: Icons.home,),
-              ],
             );
           }).toList(),
         )
@@ -317,18 +360,28 @@ class ItemList extends StatelessWidget
             {
               print(_textEditControl.text);
               print(document['Item name']);
-              return new ExpansionTile(
-                leading: Icon(
-                  Icons.fastfood,
-                  color: Colors.blue[700],
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: width/50),
+                child: new ExpansionTile(
+                  leading: Icon(
+                    Icons.fastfood,
+                    color: Colors.blue[700],
+                    size: width/15,
+                  ),
+                  title: new Text(
+                    document['Item name'],
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      fontSize: width/25,
+                    ),
+                  ),
+                  children: <Widget>[
+                    ItemInfo(str: document['Date Added'].toString(), iconImage: Icons.access_time,),
+                    ItemInfo(str: document['Fridge'].toString(), iconImage: Icons.camera_rear,), //remember to change
+                    ItemInfo(str: document['Quantity'].toString(), iconImage: Icons.format_list_numbered,),
+                    ItemInfo(str: document['Donator'].toString(), iconImage: Icons.home,),
+                  ],
                 ),
-                title: new Text(document['Item name'], textScaleFactor: 1.0, textAlign: TextAlign.left, style: TextStyle(color: Colors.red),),
-                children: <Widget>[
-                  ItemInfo(str: document['Date Added'].toString(), iconImage: Icons.access_time,),
-                  ItemInfo(str: document['Fridge'].toString(), iconImage: Icons.camera_rear,),
-                  ItemInfo(str:document['Quantity'].toString(), iconImage: Icons.format_list_numbered,), //remember to change
-                  ItemInfo(str:document['Donator'].toString(), iconImage: Icons.home,),
-                ],
               );
             }else
             {
@@ -353,7 +406,10 @@ class FavouriteItem extends StatelessWidget {
 }
 
 class ItemInfo extends StatelessWidget {
-  const ItemInfo({this.str,this.iconImage});
+  const ItemInfo({
+    this.str,
+    this.iconImage
+  });
 
   final String str;
   final IconData iconImage;
@@ -373,10 +429,16 @@ class ItemInfo extends StatelessWidget {
               child: new Icon(
                 iconImage,
                 color: Colors.blue[200],
+                size: width/15,
               ),
               padding: EdgeInsets.symmetric(horizontal: width * 0.05),
             ),
-            new Text(str, textScaleFactor: 1.0,),
+            new Text(
+              str,
+              style: TextStyle(
+                fontSize: width/32,
+              ),
+            ),
           ],
         ),
       ),

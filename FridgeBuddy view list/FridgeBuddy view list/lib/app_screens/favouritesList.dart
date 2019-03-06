@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 List<String> allList = <String>[];
 Map<String,Color> favStarColours = new Map();
+List<String> userFavList = <String>[];
+final String savedListPref = "listOfFavs";
 
 class FavList extends StatefulWidget {
   @override
@@ -10,6 +13,39 @@ class FavList extends StatefulWidget {
 }
 
 class _FavListState extends State<FavList> {
+  @override
+  void initState() {
+    super.initState();
+    //userFavList = [];
+    //_setListOfFavs(userFavList);
+    _getListOfFavs().then((result) {
+      if(result != null)
+        {
+          userFavList = result;
+        }else
+          {
+            userFavList = [];
+          }
+      print("Here "+userFavList.toString());
+      userFavList.forEach((e){
+        print(e);
+        List name = e.split("_");
+        print(name[0]);
+        favStarColours.putIfAbsent(name[0]+"ColourKey", () => Colors.yellow);
+        //favStarColours.update(n[0]+"ColourKey", (value) => Colors.yellow);
+      });
+    });
+    /*_getListOfFavs().then((result) {
+      if(result.contains(document['Item name']+"_"+document['Quantity'].toString()))
+      {
+        favStarColours.update(document['Item name']+"ColourKey", (value) => Colors.yellow);
+      }else
+      {
+        print("ELSE "+result.toString());
+      }
+    });*/
+  }
+
   Future<bool> _onWillPop(BuildContext context) {
     return showDialog(
       context: context,
@@ -29,6 +65,17 @@ class _FavListState extends State<FavList> {
         ],
       ),
     );
+  }
+
+  Future<List<String>> _getListOfFavs() async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getStringList(savedListPref);
+  }
+
+  Future<bool> _setListOfFavs(List<String> valueOfList) async
+  {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.setStringList(savedListPref, valueOfList);
   }
 
   /*Widget buildAllList() {
@@ -58,7 +105,7 @@ class _FavListState extends State<FavList> {
 
   Widget build(BuildContext context)
   {
-    //double height = MediaQuery.of(context).size.height;
+    double width = MediaQuery.of(context).size.width;
     return WillPopScope(
       onWillPop: () => _onWillPop(context),
       child: new Scaffold(
@@ -70,54 +117,108 @@ class _FavListState extends State<FavList> {
           ),
         ),
         body: StreamBuilder(
-          stream: Firestore.instance.collection('itemsAll').snapshots(),
+          stream: Firestore.instance.collection('Items').snapshots(),
           builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot)
           {
             if(!snapshot.hasData) return Text("Loading...");
             for(int colourCounter=0;colourCounter<snapshot.data.documents.length;colourCounter++)
             {
-              favStarColours.putIfAbsent(snapshot.data.documents[colourCounter]['Item Name'], () => Colors.grey);
+              favStarColours.putIfAbsent(snapshot.data.documents[colourCounter]['Item name']+"ColourKey", () => Colors.grey);
+              print("DONE");
             }
             return new ListView(
               children: snapshot.data.documents.map((document) {
-                return new ListTile(
-                  leading: Icon(
-                    Icons.fastfood,
-                    color: Colors.yellow[700],
-                  ),
-                  title: new Text(document['Item Name'], textScaleFactor: 1.0, textAlign: TextAlign.left,),
-                  subtitle: new Text(document['Donator']+", Qty: "+document['Quantity'].toString(), textScaleFactor: 1.0, textAlign: TextAlign.left,),
-                  trailing: IconButton(
-                    icon: Icon(Icons.star),
-                    color: favStarColours[document['Item Name']],
-                    onPressed: () {
-                      if(favStarColours[document['Item Name']] == Colors.grey)
-                        {
-                          setState(() {
-                            favStarColours.update(document['Item Name'], (value) => Colors.yellow);
-                            print(document['Item Name']+" "+"added to Favourites");
-                            final snackBar = SnackBar(
-                              content: Text(document['Item Name']+" "+"added to Favourites"),
-                              backgroundColor: Colors.blue,
-                              duration: Duration(milliseconds: 250),
-                            );
-                            Scaffold.of(context).showSnackBar(snackBar);
-                          });
-                        }
-                      else
-                        {
-                          setState(() {
-                            favStarColours.update(document['Item Name'], (value) => Colors.grey);
-                            print(document['Item Name']+" "+"removed from Favourites");
-                            final snackBar = SnackBar(
-                              content: Text(document['Item Name']+" "+"removed from Favourites"),
-                              backgroundColor: Colors.blue,
-                              duration: Duration(milliseconds: 250),
-                            );
-                            Scaffold.of(context).showSnackBar(snackBar);
-                          });
-                        }
-                    },
+                return Padding(
+                  padding: EdgeInsets.symmetric(vertical: width/50),
+                  child: new ListTile(
+                    leading: Icon(
+                      Icons.fastfood,
+                      color: Colors.yellow[700],
+                      size: width/15,
+                    ),
+                    title: Padding(
+                      padding: EdgeInsets.only(bottom: width/70),
+                      child: new Text(
+                        document['Item name'],
+                        style: TextStyle(
+                          fontSize: width/25,
+                        ),
+                        textAlign: TextAlign.left,
+                      ),
+                    ),
+                    subtitle: new Text(
+                      document['Donator']+", Qty: "+document['Quantity'].toString(),
+                      style: TextStyle(
+                        fontSize: width/35,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.star),
+                      iconSize: width/15,
+                      color: favStarColours[document['Item name']+"ColourKey"],
+                      onPressed: () {
+                        if(favStarColours[document['Item name']+"ColourKey"] == Colors.grey)
+                          {
+                            print("in");
+                            setState(() {
+                              favStarColours.update(document['Item name']+"ColourKey", (value) => Colors.yellow);
+                              print(document['Item name']+" added to Favourites");
+                              if(!userFavList.contains(document['Item name']+"_"+document['Quantity'].toString()))
+                              {
+                                userFavList.add(document['Item name']+"_"+document['Quantity'].toString());
+                              }
+                              //print(userFavList);
+                              _setListOfFavs(userFavList);
+                              //print(_getListOfFavs());
+                              _getListOfFavs().then((result) {
+                                print("get added result "+result.toString());
+                              });
+                              print("User Fav List (added) "+userFavList.toString());
+                              userFavList.forEach((e){
+                                //print(e);
+                                //List singleItem = e.split("_");
+                                //print("new String: "+singleItem[0]+" "+singleItem[1]);
+                              });
+                              final snackBar = SnackBar(
+                                content: Text(
+                                  document['Item name']+" added to Favourites",
+                                  style: TextStyle(
+                                    fontSize: width/25,
+                                  ),
+                                ),
+                                backgroundColor: Colors.blue,
+                                duration: Duration(seconds: 1),
+                              );
+                              Scaffold.of(context).showSnackBar(snackBar);
+                            });
+                          }
+                        else
+                          {
+                            setState(() {
+                              favStarColours.update(document['Item name']+"ColourKey", (value) => Colors.grey);
+                              print(document['Item name']+" removed from Favourites");
+                              userFavList.remove(document['Item name']+"_"+document['Quantity'].toString());
+                              _setListOfFavs(userFavList);
+                              _getListOfFavs().then((result) {
+                                print("get removed result "+result.toString());
+                              });
+                              print("User Fav List (removed) "+userFavList.toString());
+                              final snackBar = SnackBar(
+                                content: Text(
+                                  document['Item name']+" removed from Favourites",
+                                  style: TextStyle(
+                                    fontSize: width/25,
+                                  ),
+                                ),
+                                backgroundColor: Colors.blue,
+                                duration: Duration(seconds: 1),
+                              );
+                              Scaffold.of(context).showSnackBar(snackBar);
+                            });
+                          }
+                      },
+                    ),
                   ),
                 );
               }).toList(),
@@ -129,23 +230,26 @@ class _FavListState extends State<FavList> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
               new IconButton(
-                  icon: Icon(Icons.view_list),
-                  onPressed: () {
-                    Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-                  }
+                icon: Icon(Icons.view_list),
+                iconSize: width/15,
+                onPressed: () {
+                  Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+                }
               ),
               new IconButton(
                 icon: Icon(
-                  Icons.view_headline,
+                  Icons.star,
                   color: Colors.greenAccent,
                 ),
+                iconSize: width/15,
                 onPressed: () {},
               ),
               new IconButton(
-                  icon: Icon(Icons.settings),
-                  onPressed: () {
-                    Navigator.of(context).pushNamedAndRemoveUntil('/settings', (Route<dynamic> route) => false);
-                  }
+                icon: Icon(Icons.settings),
+                iconSize: width/15,
+                onPressed: () {
+                  Navigator.of(context).pushNamedAndRemoveUntil('/settings', (Route<dynamic> route) => false);
+                }
               ),
             ],
           ),
