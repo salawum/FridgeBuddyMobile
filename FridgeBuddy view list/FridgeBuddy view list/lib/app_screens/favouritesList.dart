@@ -16,8 +16,6 @@ class _FavListState extends State<FavList> {
   @override
   void initState() {
     super.initState();
-    //userFavList = [];
-    //_setListOfFavs(userFavList);
     _getListOfFavs().then((result) {
       if(result != null)
         {
@@ -26,24 +24,11 @@ class _FavListState extends State<FavList> {
           {
             userFavList = [];
           }
-      print("Here "+userFavList.toString());
       userFavList.forEach((e){
-        print(e);
         List name = e.split("_");
-        print(name[0]);
         favStarColours.putIfAbsent(name[0]+"ColourKey", () => Colors.yellow);
-        //favStarColours.update(n[0]+"ColourKey", (value) => Colors.yellow);
       });
     });
-    /*_getListOfFavs().then((result) {
-      if(result.contains(document['Item name']+"_"+document['Quantity'].toString()))
-      {
-        favStarColours.update(document['Item name']+"ColourKey", (value) => Colors.yellow);
-      }else
-      {
-        print("ELSE "+result.toString());
-      }
-    });*/
   }
 
   Future<bool> _onWillPop(BuildContext context) {
@@ -78,31 +63,6 @@ class _FavListState extends State<FavList> {
     return prefs.setStringList(savedListPref, valueOfList);
   }
 
-  /*Widget buildAllList() {
-    StreamBuilder(
-      stream: Firestore.instance.collection('itemsAll').snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return Text("Loading...");
-        return Column(
-          children: <Widget>[
-            Text(snapshot.data.documents[0]['Item Name']),
-            Text(snapshot.data.documents[0]['Fridge']),
-            Text(snapshot.data.documents[0]['Donator']),
-            Text(snapshot.data.documents[0]['Quantity'].toString()),
-          ],
-        );
-      },
-    );
-    return buildAllList();
-  }*/
-
-  /*allList.clear();
-  for(int i=0;i<snapshot.data.documents.length;i++)
-  {
-  allList.add(snapshot.data.documents[i]['Item Name']+"_"+snapshot.data.documents[i]['Quantity']);
-  print(allList);
-  }*/
-
   Widget build(BuildContext context)
   {
     double width = MediaQuery.of(context).size.width;
@@ -124,7 +84,36 @@ class _FavListState extends State<FavList> {
             for(int colourCounter=0;colourCounter<snapshot.data.documents.length;colourCounter++)
             {
               favStarColours.putIfAbsent(snapshot.data.documents[colourCounter]['Item name']+"ColourKey", () => Colors.grey);
-              print("DONE");
+            }
+            int index = 0;
+            if(userFavList.isNotEmpty)
+            {
+              for(int i=0;i<snapshot.data.documents.length;i++)
+              {
+                userFavList.sort();
+                List temp = userFavList[index].split("_");
+                if(userFavList.contains(snapshot.data.documents[i]['Item name']+"_"+temp[1]))
+                {
+                  if(index<userFavList.length-1)
+                  {
+                    index++;
+                  }
+                  List name = userFavList[userFavList.indexOf((snapshot.data.documents[i]['Item name']+"_"+temp[1].toString()))].split("_");
+                  if(favStarColours[name[0]+"ColourKey"] == Colors.yellow && snapshot.data.documents[i]['Quantity'] > int.parse(name[1]))
+                  {
+                    print("WORKING");
+                    userFavList[userFavList.indexOf((snapshot.data.documents[i]['Item name']+"_"+temp[1].toString()))] = snapshot.data.documents[i]['Item name']+"_"+snapshot.data.documents[i]['Quantity'].toString();
+                    _setListOfFavs(userFavList);
+                  }else
+                  {
+                    userFavList[userFavList.indexOf((snapshot.data.documents[i]['Item name']+"_"+temp[1].toString()))] = snapshot.data.documents[i]['Item name']+"_"+snapshot.data.documents[i]['Quantity'].toString();
+                    _setListOfFavs(userFavList);
+                  }
+                }else
+                {
+                  print("Failed check on "+snapshot.data.documents[i]['Item name']+"_"+temp[1]);
+                }
+              }
             }
             return new ListView(
               children: snapshot.data.documents.map((document) {
@@ -160,7 +149,6 @@ class _FavListState extends State<FavList> {
                       onPressed: () {
                         if(favStarColours[document['Item name']+"ColourKey"] == Colors.grey)
                           {
-                            print("in");
                             setState(() {
                               favStarColours.update(document['Item name']+"ColourKey", (value) => Colors.yellow);
                               print(document['Item name']+" added to Favourites");
@@ -168,18 +156,7 @@ class _FavListState extends State<FavList> {
                               {
                                 userFavList.add(document['Item name']+"_"+document['Quantity'].toString());
                               }
-                              //print(userFavList);
                               _setListOfFavs(userFavList);
-                              //print(_getListOfFavs());
-                              _getListOfFavs().then((result) {
-                                print("get added result "+result.toString());
-                              });
-                              print("User Fav List (added) "+userFavList.toString());
-                              userFavList.forEach((e){
-                                //print(e);
-                                //List singleItem = e.split("_");
-                                //print("new String: "+singleItem[0]+" "+singleItem[1]);
-                              });
                               final snackBar = SnackBar(
                                 content: Text(
                                   document['Item name']+" added to Favourites",
@@ -198,12 +175,8 @@ class _FavListState extends State<FavList> {
                             setState(() {
                               favStarColours.update(document['Item name']+"ColourKey", (value) => Colors.grey);
                               print(document['Item name']+" removed from Favourites");
-                              userFavList.remove(document['Item name']+"_"+document['Quantity'].toString());
+                              userFavList.removeWhere((name) => (name.contains(document['Item name'])));
                               _setListOfFavs(userFavList);
-                              _getListOfFavs().then((result) {
-                                print("get removed result "+result.toString());
-                              });
-                              print("User Fav List (removed) "+userFavList.toString());
                               final snackBar = SnackBar(
                                 content: Text(
                                   document['Item name']+" removed from Favourites",
