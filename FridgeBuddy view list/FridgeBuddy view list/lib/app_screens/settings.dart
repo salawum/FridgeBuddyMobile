@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
+import 'package:global_configuration/global_configuration.dart';
 
+GlobalConfiguration cfg = new GlobalConfiguration();
 final _feedbackBugs = TextEditingController();
-bool _notificationValGlobal = true;
-bool _notificationValFav = true;
+final String globalNotifyKey = "Global";
+final String localNotifyKey = "Local";
+bool notificationValGlobal = cfg.get(globalNotifyKey);
+bool notificationValLocal = cfg.get(localNotifyKey);
 bool _community = true;
 bool _developers = false;
 
@@ -10,8 +17,39 @@ class AppSettings extends StatefulWidget {
   @override
   _AppSettingsState createState() => new _AppSettingsState();
 }
-
 class _AppSettingsState extends State<AppSettings> {
+  @override
+  void initState() {
+    //print(cfg.getBool(globalNotifyKey));
+    _getGlobalNotifications().then((resultGlobal) {
+      if(resultGlobal != null)
+      {
+        //print(cfg.get(globalNotifyKey));
+        notificationValGlobal = resultGlobal;
+        cfg.appConfig.update(globalNotifyKey, (bool) => resultGlobal);
+        //GlobalConfiguration().setValue(globalNotifyKey, (bool) => notificationValGlobal);
+      }else
+      {
+        notificationValGlobal = false;
+        print("HELP GLOBAL");
+      }
+    });
+
+    _getLocalNotifications().then((resultLocal) {
+      if(resultLocal != null)
+      {
+        //print(cfg.getBool(localNotifyKey));
+        notificationValLocal = resultLocal;
+        cfg.appConfig.update(localNotifyKey, (bool) => resultLocal);
+        //GlobalConfiguration().setValue(localNotifyKey, (bool) => notificationValLocal);
+      }else
+      {
+        notificationValLocal = false;
+        print("HELP LOCAL");
+      }
+    });
+    super.initState();
+  }
 
   Future<bool> _onWillPop(BuildContext context) {
     return showDialog(
@@ -33,6 +71,26 @@ class _AppSettingsState extends State<AppSettings> {
     );
   }
 
+  Future<bool> _getGlobalNotifications() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(globalNotifyKey);
+  }
+
+  Future<bool> _setGlobalNotifications(bool valueOfGlobal) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.setBool(globalNotifyKey, valueOfGlobal);
+  }
+
+  Future<bool> _getLocalNotifications() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(localNotifyKey);
+  }
+
+  Future<bool> _setLocalNotifications(bool valueOfLocal) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.setBool(localNotifyKey, valueOfLocal);
+  }
+
   Widget build(BuildContext context)
   {
     double width = MediaQuery.of(context).size.width;
@@ -47,198 +105,250 @@ class _AppSettingsState extends State<AppSettings> {
             ),
           ),
         ),
-        body: ListView(
-          children: <Widget>[
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+        body: Builder(
+          builder: (BuildContext context){
+            return ListView(
               children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(top: width * 0.03, left: width * 0.1),
-                  child: Row(
-                    //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text(
-                        "General Notifications",
-                        style: TextStyle(
-                          fontSize: width/25,
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: width * 0.325),
-                        child: Switch(
-                          value: _notificationValGlobal,
-                          onChanged: (bool newValue) {
-                            setState(() {
-                              _notificationValGlobal = newValue;
-                              print(_notificationValGlobal);
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: width * 0.03, left: width * 0.1),
-                  child: Row(
-                    //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text(
-                        "Favourites List Notifications",
-                          style: TextStyle(
-                            fontSize: width/25,
-                          ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: width * 0.2),
-                        child: Switch(
-                          value: _notificationValFav,
-                          onChanged: (bool newValue) {
-                            setState(() {
-                              _notificationValFav = newValue;
-                              print(_notificationValFav);
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: height * 0.02),
-                  child: Text(
-                    "Got any feedback?",
-                    style: TextStyle(
-                      fontSize: width/25,
-                    ),
-                    //textAlign: TextAlign.left,
-                  ),
-                ),
-                TextField(
-                  autofocus: false,
-                  keyboardType: TextInputType.multiline,
-                  maxLength: 300,
-                  autocorrect: true,
-                  style: TextStyle(
-                    fontSize: width/25,
-                  ),
-                  maxLines: null,
-                  textAlign: TextAlign.center,
-                  controller: _feedbackBugs, //_feedback.text would hold the string value
-                  decoration: InputDecoration(
-                    counterStyle: TextStyle(
-                      fontSize: width/40,
-                    ),
-                    border: InputBorder.none,
-                    hintText: "Message...",
-                    hintStyle: TextStyle(
-                      fontSize: width/25,
-                    ),
-                  ),
-                ),
                 Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Row(
-                      //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(left: width/6),
-                          child: Container(
-                            width: width * 0.05,
-                            height: height * 0.05,
-                            child: (_community)
-                                ? RawMaterialButton(
-                              shape: CircleBorder(),
-                              fillColor: Colors.blue,
-                              onPressed: () {},
-                              )
-                                : RawMaterialButton(
-                              shape: CircleBorder(),
-                              fillColor: Colors.grey,
-                              onPressed: () {
-                                setState(() {
-                                  _community = !_community;
-                                  _developers = false;
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(left: width/12),
-                          child: Text(
-                            "Community Fridge Feedback",
+                    Padding(
+                      padding: EdgeInsets.only(top: width * 0.03, left: width * 0.1),
+                      child: Row(
+                        //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text(
+                            "General Notifications",
                             style: TextStyle(
                               fontSize: width/25,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(left: width/6),
-                          child: Container(
-                            width: width * 0.05,
-                            height: height * 0.05,
-                            child: (_developers)
-                                ? RawMaterialButton(
-                              shape: CircleBorder(),
-                              fillColor: Colors.blue,
-                              onPressed: () {},
-                            )
-                                : RawMaterialButton(
-                              shape: CircleBorder(),
-                              fillColor: Colors.grey,
-                              onPressed: () {
+                          Padding(
+                            padding: EdgeInsets.only(left: width * 0.325),
+                            child: Switch(
+                              value: notificationValGlobal,
+                              onChanged: (bool newValue) {
                                 setState(() {
-                                  _developers = !_developers;
-                                  _community = false;
+                                  notificationValGlobal = newValue;
+                                  _setGlobalNotifications(notificationValGlobal);
                                 });
                               },
                             ),
                           ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(left: width/12),
-                          child: Text(
-                            "App Feedback",
-                              style: TextStyle(
-                                fontSize: width/25,
-                              ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: width * 0.03, left: width * 0.1),
+                      child: Row(
+                        //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text(
+                            "Favourites List Notifications",
+                            style: TextStyle(
+                              fontSize: width/25,
+                            ),
                           ),
+                          Padding(
+                            padding: EdgeInsets.only(left: width * 0.2),
+                            child: Switch(
+                              value: notificationValLocal,
+                              onChanged: (bool newValue) {
+                                setState(() {
+                                  notificationValLocal = newValue;
+                                  _setLocalNotifications(notificationValLocal);
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: height * 0.02),
+                      child: Text(
+                        "Got any feedback?",
+                        style: TextStyle(
+                          fontSize: width/25,
+                        ),
+                        //textAlign: TextAlign.left,
+                      ),
+                    ),
+                    TextField(
+                      autofocus: false,
+                      keyboardType: TextInputType.multiline,
+                      maxLength: 300,
+                      autocorrect: true,
+                      style: TextStyle(
+                        fontSize: width/25,
+                      ),
+                      maxLines: null,
+                      textAlign: TextAlign.center,
+                      controller: _feedbackBugs, //_feedback.text would hold the string value
+                      decoration: InputDecoration(
+                        counterStyle: TextStyle(
+                          fontSize: width/40,
+                        ),
+                        border: InputBorder.none,
+                        hintText: "Message...",
+                        hintStyle: TextStyle(
+                          fontSize: width/25,
+                        ),
+                      ),
+                    ),
+                    Column(
+                      children: <Widget>[
+                        Row(
+                          //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.only(left: width/6),
+                              child: Container(
+                                width: width * 0.05,
+                                height: height * 0.05,
+                                child: (_community)
+                                    ? RawMaterialButton(
+                                  shape: CircleBorder(),
+                                  fillColor: Colors.blue,
+                                  onPressed: () {},
+                                )
+                                    : RawMaterialButton(
+                                  shape: CircleBorder(),
+                                  fillColor: Colors.grey,
+                                  onPressed: () {
+                                    setState(() {
+                                      _community = !_community;
+                                      _developers = false;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(left: width/12),
+                              child: Text(
+                                "Community Fridge Feedback",
+                                style: TextStyle(
+                                  fontSize: width/25,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.only(left: width/6),
+                              child: Container(
+                                width: width * 0.05,
+                                height: height * 0.05,
+                                child: (_developers)
+                                    ? RawMaterialButton(
+                                  shape: CircleBorder(),
+                                  fillColor: Colors.blue,
+                                  onPressed: () {},
+                                )
+                                    : RawMaterialButton(
+                                  shape: CircleBorder(),
+                                  fillColor: Colors.grey,
+                                  onPressed: () {
+                                    setState(() {
+                                      _developers = !_developers;
+                                      _community = false;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(left: width/12),
+                              child: Text(
+                                "App Feedback",
+                                style: TextStyle(
+                                  fontSize: width/25,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: height/20),
+                      child: SizedBox(
+                        height: height/20,
+                        width: width/3,
+                        child: FlatButton(
+                            child: Text(
+                              "Let us know",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.normal,
+                                fontSize: width/25,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            color: Colors.blue[700],
+                            onPressed: (){
+                              setState(() {
+                                if(_feedbackBugs.text.isNotEmpty)
+                                {
+                                  if(_developers)
+                                  {
+                                    Firestore.instance.collection("DeveloperFeedback").document().setData({
+                                      'feedback' : _feedbackBugs.text
+                                    });
+                                    _feedbackBugs.clear();
+                                    final snackBar = SnackBar(
+                                      content: Text(
+                                        "Thank you for your feedback",
+                                        style: TextStyle(
+                                          fontSize: width/25,
+                                        ),
+                                      ),
+                                      backgroundColor: Colors.blue,
+                                    );
+                                    Scaffold.of(context).showSnackBar(snackBar);
+                                  }else if(_community)
+                                  {
+                                    Firestore.instance.collection("CommunityFeedback").document().setData({
+                                      'feedback' : _feedbackBugs.text
+                                    });
+                                    _feedbackBugs.clear();
+                                    final snackBar = SnackBar(
+                                      content: Text(
+                                        "Thank you for your feedback",
+                                        style: TextStyle(
+                                          fontSize: width/25,
+                                        ),
+                                      ),
+                                      backgroundColor: Colors.blue,
+                                    );
+                                    Scaffold.of(context).showSnackBar(snackBar);
+                                  }
+                                }else
+                                {
+                                  final snackBar = SnackBar(
+                                    content: Text(
+                                      "Sorry, but your feedback can't be blank",
+                                      style: TextStyle(
+                                        fontSize: width/25,
+                                      ),
+                                    ),
+                                    backgroundColor: Colors.red,
+                                  );
+                                  Scaffold.of(context).showSnackBar(snackBar);
+                                }
+                              });
+                            }
+                        ),
+                      ),
+                    ),
                   ],
                 ),
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: height/20),
-                  child: SizedBox(
-                    height: height/20,
-                    width: width/3,
-                    child: FlatButton(
-                      child: Text(
-                        "Let us know",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.normal,
-                          fontSize: width/25,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      color: Colors.blue[700],
-                      onPressed: (){
-                        print(_feedbackBugs.text);
-                        _feedbackBugs.text = "";
-                      }
-                    ),
-                  ),
-                ),
               ],
-            ),
-          ],
+            );
+          }
         ),
         bottomNavigationBar: BottomAppBar(
           child: Row(

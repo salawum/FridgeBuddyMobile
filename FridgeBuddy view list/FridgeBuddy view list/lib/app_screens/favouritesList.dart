@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
 
 List<String> allList = <String>[];
 Map<String,Color> favStarColours = new Map();
@@ -57,8 +58,7 @@ class _FavListState extends State<FavList> {
     return prefs.getStringList(savedListPref);
   }
 
-  Future<bool> _setListOfFavs(List<String> valueOfList) async
-  {
+  Future<bool> _setListOfFavs(List<String> valueOfList) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.setStringList(savedListPref, valueOfList);
   }
@@ -109,9 +109,6 @@ class _FavListState extends State<FavList> {
                     userFavList[userFavList.indexOf((snapshot.data.documents[i]['Item name']+"_"+temp[1].toString()))] = snapshot.data.documents[i]['Item name']+"_"+snapshot.data.documents[i]['Quantity'].toString();
                     _setListOfFavs(userFavList);
                   }
-                }else
-                {
-                  print("Failed check on "+snapshot.data.documents[i]['Item name']+"_"+temp[1]);
                 }
               }
             }
@@ -151,7 +148,6 @@ class _FavListState extends State<FavList> {
                           {
                             setState(() {
                               favStarColours.update(document['Item name']+"ColourKey", (value) => Colors.yellow);
-                              print(document['Item name']+" added to Favourites");
                               if(!userFavList.contains(document['Item name']+"_"+document['Quantity'].toString()))
                               {
                                 userFavList.add(document['Item name']+"_"+document['Quantity'].toString());
@@ -174,7 +170,6 @@ class _FavListState extends State<FavList> {
                           {
                             setState(() {
                               favStarColours.update(document['Item name']+"ColourKey", (value) => Colors.grey);
-                              print(document['Item name']+" removed from Favourites");
                               userFavList.removeWhere((name) => (name.contains(document['Item name'])));
                               _setListOfFavs(userFavList);
                               final snackBar = SnackBar(
