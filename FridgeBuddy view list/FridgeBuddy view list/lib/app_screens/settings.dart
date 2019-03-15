@@ -405,7 +405,7 @@ class _AppSettingsState extends State<AppSettings> {
     );
   }
 
-  updateToken() {
+  updateToken(){
     _messaging.getToken().then((token) {
       if(config.get(globalNotifyKey))
       {
