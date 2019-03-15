@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 List<String> allList = <String>[];
 Map<String,Color> favStarColours = new Map();
 List<String> userFavList = <String>[];
 final String savedListPref = "listOfFavs";
+
 
 class FavList extends StatefulWidget {
   @override
@@ -14,6 +16,7 @@ class FavList extends StatefulWidget {
 }
 
 class _FavListState extends State<FavList> {
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   @override
   void initState() {
     super.initState();
@@ -30,6 +33,16 @@ class _FavListState extends State<FavList> {
         favStarColours.putIfAbsent(name[0]+"ColourKey", () => Colors.yellow);
       });
     });
+    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+    var android = new AndroidInitializationSettings('mipmap/ic_launcher');
+    var iOS = new IOSInitializationSettings();
+    var initSettings = new InitializationSettings(android, iOS);
+    flutterLocalNotificationsPlugin.initialize(initSettings, onSelectNotification: onSelectNotification);
+  }
+
+  Future onSelectNotification(String payload)
+  {
+    debugPrint(payload);
   }
 
   Future<bool> _onWillPop(BuildContext context) {
@@ -102,6 +115,7 @@ class _FavListState extends State<FavList> {
                   if(favStarColours[name[0]+"ColourKey"] == Colors.yellow && snapshot.data.documents[i]['Quantity'] > int.parse(name[1]))
                   {
                     print("WORKING");
+                    showNotification();
                     userFavList[userFavList.indexOf((snapshot.data.documents[i]['Item name']+"_"+temp[1].toString()))] = snapshot.data.documents[i]['Item name']+"_"+snapshot.data.documents[i]['Quantity'].toString();
                     _setListOfFavs(userFavList);
                   }else
@@ -224,5 +238,12 @@ class _FavListState extends State<FavList> {
         ),
       ),
     );
+  }
+
+  showNotification() async {
+    var android = new AndroidNotificationDetails("Channel ID", "Channel Name", "Channel Desc");
+    var iOS = new IOSNotificationDetails();
+    var platform = new NotificationDetails(android, iOS);
+    await flutterLocalNotificationsPlugin.show(0, "FridgeBuddy", "An item from your favourites list has been updated", platform, payload: "Test");
   }
 }

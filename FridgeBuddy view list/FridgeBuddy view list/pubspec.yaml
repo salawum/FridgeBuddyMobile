@@ -21,6 +21,7 @@ dependencies:
   cupertino_icons:
   shared_preferences: ^0.4.2
   global_configuration: ^0.1.4
+  flutter_local_notifications: 0.4.5
 
 dev_dependencies:
   flutter_test:
