@@ -1,4 +1,4 @@
 final Map<String, bool> appSettings = {
-  "Global": true,
+  "Global": false,
   "Local": false,
 };

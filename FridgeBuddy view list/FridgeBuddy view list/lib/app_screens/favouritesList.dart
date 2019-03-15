@@ -3,11 +3,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:global_configuration/global_configuration.dart';
 
 List<String> allList = <String>[];
 Map<String,Color> favStarColours = new Map();
 List<String> userFavList = <String>[];
 final String savedListPref = "listOfFavs";
+final String globalNotifyKey = "Global";
+final String localNotifyKey = "Local";
+GlobalConfiguration config = new GlobalConfiguration();
 
 class FavList extends StatefulWidget {
   @override
@@ -108,8 +112,11 @@ class _FavListState extends State<FavList> {
                   List name = userFavList[userFavList.indexOf((snapshot.data.documents[i]['Item name']+"_"+temp[1].toString()))].split("_");
                   if(favStarColours[name[0]+"ColourKey"] == Colors.yellow && snapshot.data.documents[i]['Quantity'] > int.parse(name[1]))
                   {
-                    print("WORKING");
-                    showNotification();
+                    if(config.getBool(localNotifyKey))
+                    {
+                      print("WORKING");
+                      showNotification();
+                    }
                     userFavList[userFavList.indexOf((snapshot.data.documents[i]['Item name']+"_"+temp[1].toString()))] = snapshot.data.documents[i]['Item name']+"_"+snapshot.data.documents[i]['Quantity'].toString();
                     _setListOfFavs(userFavList);
                   }else
