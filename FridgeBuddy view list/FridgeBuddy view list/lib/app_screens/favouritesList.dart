@@ -9,7 +9,6 @@ Map<String,Color> favStarColours = new Map();
 List<String> userFavList = <String>[];
 final String savedListPref = "listOfFavs";
 
-
 class FavList extends StatefulWidget {
   @override
   _FavListState createState() => new _FavListState();
@@ -37,12 +36,7 @@ class _FavListState extends State<FavList> {
     var android = new AndroidInitializationSettings('mipmap/ic_launcher');
     var iOS = new IOSInitializationSettings();
     var initSettings = new InitializationSettings(android, iOS);
-    flutterLocalNotificationsPlugin.initialize(initSettings, onSelectNotification: onSelectNotification);
-  }
-
-  Future onSelectNotification(String payload)
-  {
-    debugPrint(payload);
+    flutterLocalNotificationsPlugin.initialize(initSettings);
   }
 
   Future<bool> _onWillPop(BuildContext context) {
@@ -244,6 +238,6 @@ class _FavListState extends State<FavList> {
     var android = new AndroidNotificationDetails("Channel ID", "Channel Name", "Channel Desc");
     var iOS = new IOSNotificationDetails();
     var platform = new NotificationDetails(android, iOS);
-    await flutterLocalNotificationsPlugin.show(0, "FridgeBuddy", "An item from your favourites list has been updated", platform, payload: "Test");
+    await flutterLocalNotificationsPlugin.show(0, "Ta-da!", "An item from your favourites list has been updated", platform, payload: "Test");
   }
 }
