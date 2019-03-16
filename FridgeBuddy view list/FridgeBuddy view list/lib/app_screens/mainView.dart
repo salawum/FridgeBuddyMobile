@@ -1,16 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:async';
+import './favouritesList.dart';
+import './settings.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 final _textEditControl = TextEditingController();
 final _focus = FocusNode();
-List<ListTile> favouriteItems = <ListTile>[];
-List searchList = [];
-var _search = true;
-var _searching = false;
-GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
+List<ExpansionTile> favouriteItems = <ExpansionTile>[];
 
 BuildContext context;
+
+class MainView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: "View List",
+      theme: new ThemeData(
+        primarySwatch: Colors.blue,
+        brightness: Brightness.dark,
+        inputDecorationTheme: InputDecorationTheme(
+          hintStyle: TextStyle(
+            color: Colors.white,
+          ),
+        ),
+      ),
+      home: SafeArea(
+      child: new MyHomePage(),
+    ));
+  }
+}
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -18,377 +37,182 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  final FirebaseMessaging _messaging = FirebaseMessaging();
   @override
   void initState() {
     super.initState();
-    _textEditControl.addListener(() {
-      if (_textEditControl.text.isEmpty) {
-        setState(() {
-          _searching = !_searching;
-        });
-      }
-    });
-  }
 
-  Future<bool> _onWillPop(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
-    return showDialog(
-      context: context,
-      builder: (context) => new AlertDialog(
-        title: new Text(
-          "Are you sure?",
-          style: TextStyle(
-            fontSize: width/24,
-          ),
-        ),
-        content: new Text(
-          "Do you want to exit FridgeBuddy?",
-          style: TextStyle(
-            fontSize: width/30,
-          ),
-        ),
-        actions: <Widget>[
-          new FlatButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: new Text("No",
-              style: TextStyle(
-                fontSize: width/30,
-              ),
-            ),
-          ),
-          new FlatButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: new Text("Yes",
-              style: TextStyle(
-                fontSize: width/30,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    _messaging.getToken().then((token) {
+      Firestore.instance
+          .runTransaction((transaction) async {
+        await transaction.set(
+            Firestore.instance
+                .collection("notifytokens")
+                .document(token),
+            {
+              'mobiletokens': token,
+            });
+      });
+    });
   }
 
   @override
   Widget build(context) {
     double height = MediaQuery.of(context).size.height;
-    double width = MediaQuery.of(context).size.width;
-    double statusBarHeight = MediaQuery.of(context).padding.top;
-    return new WillPopScope(
-      onWillPop: () => _onWillPop(context),
-      child: Scaffold(
-        key: _scaffoldKey,
-        body: Container(
-          child: Column(
-            //mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(top: statusBarHeight),
-                child: (!_search)
-                    ? Container(
-                  width: width,
-                  height: height * 0.1,
-                  color: Colors.black12,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      Expanded(
-                        flex: 2,
-                        child: Container(
-                          decoration: new BoxDecoration(
-                            image: new DecorationImage(
-                              image: new AssetImage('images/logo.png'),
-                              fit: BoxFit.contain,
-                            ),
-                            //color: Colors.red,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 7,
-                        child: TextField(
-                          autocorrect: true,
-                          autofocus: false,
-                          focusNode: _focus,
-                          style: new TextStyle(
-                            color: Colors.white,
-                            fontSize: width/30,
-                          ),
-                          controller: _textEditControl, //holds the value for the input for text
-                          decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.search,
-                              size: width/15,
-                            ),
-                            border: InputBorder.none,
-                            hintText: "Search...",
-                            hintStyle: new TextStyle(
-                              fontSize: width/30,
-                            ),
-                          ),
-                          onChanged: (searchText)
-                          {
-                            //print (searchText.substring(0,1).toUpperCase());
-                          },
-                        ),
-                      ),
-                      Expanded(
-                          flex: 2,
-                          child: IconButton(
-                            icon: Icon(Icons.close),
-                            iconSize: width/15,
-                            onPressed: ()
-                            {
-                              setState(() {
-                                _search = true;
-                                _textEditControl.clear();
-                              });
-                            },
-                          )
-                      ),
-                    ],
-                  ),
-                )
-                    : Container(
-                  width: width,
-                  height: height * 0.1,
-                  color: Colors.black12,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: <Widget>[
-                      Expanded(
-                        flex: 3,
-                        child: Container(
-                          decoration: new BoxDecoration(
-                            image: new DecorationImage(
-                              image: new AssetImage('images/logo.png'),
-                              fit: BoxFit.contain,
-                            ),
-                            //color: Colors.red,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 7,
-                        child: Text(
-                          "FridgeBuddy",
-                          textScaleFactor: 2,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: width/28,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: IconButton(
-                          icon: Icon(Icons.search),
-                          iconSize: width/12,
-                          onPressed: ()
-                          {
-                            setState(() {
-                              _search = false;
-                            });
-                          },
-                        ),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: IconButton(
-                          icon: Icon(Icons.filter_list),
-                          iconSize: width/12,
-                          onPressed: ()
-                          {
-                            setState(() {
-                              _textEditControl.text = "";
-                              _scaffoldKey.currentState.openEndDrawer();
-                            });
-                          },
-                        )
-                      ),
-                    ],
-                  ),
-                )
-              ),
-              Flexible(
-                fit: FlexFit.tight,
-                child: ItemList(),
-              ),
-            ],
+    return new Scaffold(
+      appBar: new AppBar(
+        leading: new IconButton(
+          icon: Icon(
+          Icons.search,
+          ),
+        onPressed: () => FocusScope.of(context).requestFocus(_focus)
+        ),
+        actions:[
+          Builder(
+            builder: (context) => IconButton(
+              icon: Icon(Icons.filter_list),
+              onPressed: () => Scaffold.of(context).openEndDrawer(),
+              tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+            ),
+          ),
+        ],
+        title: new TextField(
+          autofocus: false,
+          focusNode: _focus,
+          style: new TextStyle(
+            color: Colors.white,
+          ),
+          controller: _textEditControl, //holds the value for the input for text
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            hintText: "Search...",
           ),
         ),
-        endDrawer: Container(
-          width: width * 0.7,
-          child: Drawer(
-            child: ListView(
-              children: <Widget>[
-                Container(
-                  height: height * 0.075,
-                  child: DrawerHeader(
-                    decoration: BoxDecoration (
-                      color: Colors.blue,
-                    ),
-                    child: Text(
-                      "Search Filters",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: width/15,
-                      ),
-                    ),
+      ),
+      body: new ItemList(),
+      endDrawer: Drawer(
+        child: ListView(
+          children: <Widget>[
+            Container(
+              height: height * 0.075,
+              child: DrawerHeader(
+                decoration: BoxDecoration (
+                  color: Colors.blue,
+                ),
+                child: Text("Search Filters",
+                  textScaleFactor: 1.5,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
                   ),
                 ),
-                ListTile(
-                  title: Padding(
-                    padding: EdgeInsets.symmetric(vertical: width/40),
-                    child: Text(
-                      "Sort by Fridge",
-                      style: TextStyle(
-                        fontSize: width/25,
-                      ),
-                    ),
-                  ),
-                  onTap: () {
-                    //stuff
-                    //print(_textEditControl.text);
-                    Navigator.pop(context);
-                  },
-                ),
-                ListTile(
-                  title: Padding(
-                    padding: EdgeInsets.symmetric(vertical: width/40),
-                    child: Text(
-                      "Sort by Item Name",
-                      style: TextStyle(
-                        fontSize: width/25,
-                      ),
-                    ),
-                  ),
-                  onTap: () {
-                    //stuff
-                    Navigator.pop(context);
-                  },
-                ),
-              ],
-            )
+              ),
+            ),
+            ListTile(
+              title: Text("Sort by Fridge", textScaleFactor: 1.2),
+              onTap: () {
+                //stuff
+                print(_textEditControl.text);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text("Sort by Item Name", textScaleFactor: 1.2),
+              onTap: () {
+                //stuff
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        )
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        //onTap: onTabTapped, // new
+        currentIndex: 0, // new
+        items: [
+          new BottomNavigationBarItem(
+            icon: IconButton(
+              icon: Icon(Icons.view_list),
+              onPressed: () {},
+            ),
+            title: Text("View Items"),
           ),
-        ),
-        bottomNavigationBar: BottomAppBar(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              new IconButton(
-                icon: Icon(
-                  Icons.view_list,
-                  color: Colors.greenAccent,
-                ),
-                iconSize: width/15,
-                onPressed: () {},
-              ),
-              new IconButton(
-                  icon: Icon(Icons.star),
-                  iconSize: width/15,
-                  onPressed: () {
-                    Navigator.of(context).pushNamedAndRemoveUntil('/favList', (Route<dynamic> route) => false);
-                  }
-              ),
-              new IconButton(
-                  icon: Icon(Icons.settings),
-                  iconSize: width/15,
-                  onPressed: () {
-                    Navigator.of(context).pushNamedAndRemoveUntil('/settings', (Route<dynamic> route) => false);
-                  }
-              ),
-            ],
+          new BottomNavigationBarItem(
+            icon: IconButton(
+              icon: Icon(Icons.view_headline),
+              onPressed: ()=> Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new FavouritesList())),
+            ),
+            title: Text("Favourites List"),
           ),
-        ),
+          new BottomNavigationBarItem(
+            icon: IconButton(
+              icon: Icon(Icons.settings),
+              onPressed: ()=> Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new Settings())),
+            ),
+            title: Text("Settings"),
+          ),
+        ],
       ),
     );
   }
 }
 
-class ItemList extends StatelessWidget
-{
+class ItemList extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
-    double width = MediaQuery.of(context).size.width;
     return new StreamBuilder(
       stream: Firestore.instance.collection('Items').snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (!snapshot.hasData){
-          return new Text('Loading...',
-            style: TextStyle(
-              fontSize: width/25,
-            ),
-            textAlign: TextAlign.center,
-          );
-        }
-        return (!_searching)
-            ? ListView(
+        if (!snapshot.hasData) return new Text('Loading...', textScaleFactor: 1.0);
+        return new ListView(
           children: snapshot.data.documents.map((document) {
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: width/50),
-              child: new ExpansionTile(
-                leading: Icon(
-                  Icons.fastfood,
-                  color: Colors.blue[700],
-                  size: width/15,
-                ),
-                title: Padding(
-                  padding: EdgeInsets.only(left: width/50),
-                  child: new Text(document['Item name'],
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      fontSize: width/25,
-                    ),
-                  ),
-                ),
-                children: <Widget>[
-                  ItemInfo(str: document['Date Added'].toString(), iconImage: Icons.access_time,),
-                  ItemInfo(str: document['Fridge'].toString(), iconImage: Icons.camera_rear,), //remember to change
-                  ItemInfo(str:document['Quantity'].toString(), iconImage: Icons.format_list_numbered,),
-                  ItemInfo(str:document['Donator'].toString(), iconImage: Icons.home,),
-                ],
+            return new ExpansionTile(
+              leading: Icon(
+                Icons.fastfood,
+                color: Colors.blue[700],
               ),
-            );
-          }).toList(),
-        )
-            : ListView(
-          children: snapshot.data.documents.map((document) {
-            if(document['Item name'].toString().toLowerCase().contains((_textEditControl.text).toLowerCase()) && _textEditControl.text.isNotEmpty)
-            {
-              print(_textEditControl.text);
-              print(document['Item name']);
-              return Padding(
-                padding: EdgeInsets.symmetric(vertical: width/50),
-                child: new ExpansionTile(
-                  leading: Icon(
-                    Icons.fastfood,
-                    color: Colors.blue[700],
-                    size: width/15,
+              title: new Text(document['Item name'], textScaleFactor: 1.0, textAlign: TextAlign.left,),
+              children: <Widget>[
+                ItemInfo(str: document['Date Added'].toString(), iconImage: Icons.access_time,),
+                ItemInfo(str: document['Fridge'].toString(), iconImage: Icons.camera_rear,),
+                ItemInfo(str:document['Quantity'].toString(), iconImage: Icons.format_list_numbered,),
+                ItemInfo(str:document['Donator'].toString(), iconImage: Icons.home,),
+                FlatButton(
+                  child: Text(
+                    "Add to Favourites",
+                    textScaleFactor: 1.2,
                   ),
-                  title: new Text(
-                    document['Item name'],
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      fontSize: width/25,
-                    ),
-                  ),
-                  children: <Widget>[
-                    ItemInfo(str: document['Date Added'].toString(), iconImage: Icons.access_time,),
-                    ItemInfo(str: document['Fridge'].toString(), iconImage: Icons.camera_rear,), //remember to change
-                    ItemInfo(str: document['Quantity'].toString(), iconImage: Icons.format_list_numbered,),
-                    ItemInfo(str: document['Donator'].toString(), iconImage: Icons.home,),
-                  ],
+                  color: Colors.blue[700],
+                  onPressed: (){
+                    print("oof");
+                    favouriteItems.add(
+                      ExpansionTile(
+                        title: new Text(document['Item name'], textScaleFactor: 1.0, textAlign: TextAlign.left,),
+                        children: <Widget>[
+                          ItemInfo(str: document['Date Added'].toString(), iconImage: Icons.access_time,),
+                          ItemInfo(str: document['Fridge'].toString(), iconImage: Icons.camera_rear,),
+                          ItemInfo(str:document['Quantity'].toString(), iconImage: Icons.format_list_numbered,),
+                          ItemInfo(str:document['Donator'].toString(), iconImage: Icons.home,),
+                          FlatButton(
+                            child: Text(
+                              "Remove from Favourites",
+                              textScaleFactor: 1.2,
+                            ),
+                            color: Colors.blue[700],
+                            onPressed: () {
+                              print("oof");
+                              favouriteItems.removeWhere((item) => item.title.toString().contains(document['Item name']));
+                              Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => new FavouritesList()));
+                            },
+                          ),
+                        ],
+                      )
+                    );
+                  }
                 ),
-              );
-            }else
-            {
-              print("Not equal");
-              Text empty = new Text("");
-              return empty;
-            }
+              ],
+            );
           }).toList(),
         );
       },
@@ -406,10 +230,7 @@ class FavouriteItem extends StatelessWidget {
 }
 
 class ItemInfo extends StatelessWidget {
-  const ItemInfo({
-    this.str,
-    this.iconImage
-  });
+  const ItemInfo({this.str,this.iconImage});
 
   final String str;
   final IconData iconImage;
@@ -429,16 +250,10 @@ class ItemInfo extends StatelessWidget {
               child: new Icon(
                 iconImage,
                 color: Colors.blue[200],
-                size: width/15,
               ),
               padding: EdgeInsets.symmetric(horizontal: width * 0.05),
             ),
-            new Text(
-              str,
-              style: TextStyle(
-                fontSize: width/32,
-              ),
-            ),
+            new Text(str, textScaleFactor: 1.0,),
           ],
         ),
       ),
