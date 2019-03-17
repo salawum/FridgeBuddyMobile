@@ -8,7 +8,12 @@ List<ListTile> favouriteItems = <ListTile>[];
 List searchList = [];
 var _search = true;
 var _searching = false;
+var filtered = false;
 GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
+List filteredList = [];
+List<ExpansionTile> expansionFilter = <ExpansionTile>[];
+var sortByFridge = false;
+var sortByName = true;
 
 BuildContext context;
 
@@ -127,10 +132,6 @@ class _MyHomePageState extends State<MyHomePage> {
                               fontSize: width/30,
                             ),
                           ),
-                          onChanged: (searchText)
-                          {
-                            //print (searchText.substring(0,1).toUpperCase());
-                          },
                         ),
                       ),
                       Expanded(
@@ -142,6 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             {
                               setState(() {
                                 _search = true;
+                                filtered = false;
                                 _textEditControl.clear();
                               });
                             },
@@ -189,6 +191,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           onPressed: ()
                           {
                             setState(() {
+                              filtered = false;
                               _search = false;
                             });
                           },
@@ -214,7 +217,11 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               Flexible(
                 fit: FlexFit.tight,
-                child: ItemList(),
+                child: (!filtered)
+                  ? ItemList()
+                  : ListView(
+                    children: expansionFilter.toList(),
+                )
               ),
             ],
           ),
@@ -250,10 +257,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                   ),
+                  selected: sortByFridge,
                   onTap: () {
-                    //stuff
-                    //print(_textEditControl.text);
-                    Navigator.pop(context);
+                    setState(() {
+                      filtered = true;
+                      Navigator.pop(context);
+                      sortByFridge = true;
+                      sortByName = false;
+                    });
                   },
                 ),
                 ListTile(
@@ -266,9 +277,14 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                   ),
+                  selected: sortByName,
                   onTap: () {
-                    //stuff
-                    Navigator.pop(context);
+                    setState(() {
+                      filtered = false;
+                      Navigator.pop(context);
+                      sortByFridge = false;
+                      sortByName = true;
+                    });
                   },
                 ),
               ],
@@ -288,18 +304,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 onPressed: () {},
               ),
               new IconButton(
-                  icon: Icon(Icons.star),
-                  iconSize: width/15,
-                  onPressed: () {
-                    Navigator.of(context).pushNamedAndRemoveUntil('/favList', (Route<dynamic> route) => false);
-                  }
+                icon: Icon(Icons.star),
+                iconSize: width/15,
+                onPressed: () {
+                  Navigator.of(context).pushNamedAndRemoveUntil('/favList', (Route<dynamic> route) => false);
+                }
               ),
               new IconButton(
-                  icon: Icon(Icons.settings),
-                  iconSize: width/15,
-                  onPressed: () {
-                    Navigator.of(context).pushNamedAndRemoveUntil('/settings', (Route<dynamic> route) => false);
-                  }
+                icon: Icon(Icons.settings),
+                iconSize: width/15,
+                onPressed: () {
+                  Navigator.of(context).pushNamedAndRemoveUntil('/settings', (Route<dynamic> route) => false);
+                }
               ),
             ],
           ),
@@ -322,6 +338,41 @@ class ItemList extends StatelessWidget
               fontSize: width/25,
             ),
             textAlign: TextAlign.center,
+          );
+        }
+        filteredList.clear();
+        expansionFilter.clear();
+        for(int i=0;i<snapshot.data.documents.length;i++)
+        {
+          filteredList.add(snapshot.data.documents[i]['Fridge']+"_"+snapshot.data.documents[i]['Date Added'].toString()+"_"+snapshot.data.documents[i]['Item name']+"_"+snapshot.data.documents[i]['Quantity'].toString()+"_"+snapshot.data.documents[i]['Donator']);
+        }
+        filteredList.sort();
+        for(int i=0;i<filteredList.length;i++)
+        {
+          List temp = filteredList[i].toString().split("_");
+          expansionFilter.add(
+            new ExpansionTile(
+              leading: Icon(
+                Icons.fastfood,
+                color: Colors.blue[700],
+                size: width/15,
+              ),
+              title: Padding(
+                padding: EdgeInsets.only(left: width/50),
+                child: new Text(temp[2],
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                    fontSize: width/25,
+                  ),
+                ),
+              ),
+              children: <Widget>[
+                ItemInfo(str:temp[1], iconImage: Icons.access_time,),
+                ItemInfo(str:temp[0], iconImage: Icons.camera_rear,), //remember to change
+                ItemInfo(str:temp[3], iconImage: Icons.format_list_numbered,),
+                ItemInfo(str:temp[4], iconImage: Icons.home,),
+              ],
+            )
           );
         }
         return (!_searching)
@@ -358,8 +409,6 @@ class ItemList extends StatelessWidget
           children: snapshot.data.documents.map((document) {
             if(document['Item name'].toString().toLowerCase().contains((_textEditControl.text).toLowerCase()) && _textEditControl.text.isNotEmpty)
             {
-              print(_textEditControl.text);
-              print(document['Item name']);
               return Padding(
                 padding: EdgeInsets.symmetric(vertical: width/50),
                 child: new ExpansionTile(
@@ -385,7 +434,6 @@ class ItemList extends StatelessWidget
               );
             }else
             {
-              print("Not equal");
               Text empty = new Text("");
               return empty;
             }
