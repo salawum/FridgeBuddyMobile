@@ -114,7 +114,6 @@ class _FavListState extends State<FavList> {
                   {
                     if(config.getBool(localNotifyKey))
                     {
-                      print("WORKING");
                       showNotification();
                     }
                     userFavList[userFavList.indexOf((snapshot.data.documents[i]['Item name']+"_"+temp[1].toString()))] = snapshot.data.documents[i]['Item name']+"_"+snapshot.data.documents[i]['Quantity'].toString();

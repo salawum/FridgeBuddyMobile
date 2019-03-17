@@ -22,16 +22,13 @@ class AppSettings extends StatefulWidget {
 class _AppSettingsState extends State<AppSettings> {
   @override
   void initState() {
-    //print(config.getBool(globalNotifyKey));
     setState(() {
       _getGlobalNotifications().then((resultGlobal) {
         if (resultGlobal != null) {
-          //print(config.get(globalNotifyKey));
           setState(() {
             notificationValGlobal = resultGlobal;
             config.appConfig.update(globalNotifyKey, (bool) => resultGlobal);
           });
-          //GlobalConfiguration().setValue(globalNotifyKey, (bool) => notificationValGlobal);
         } else {
           notificationValGlobal = false;
         }
@@ -39,12 +36,10 @@ class _AppSettingsState extends State<AppSettings> {
 
       _getLocalNotifications().then((resultLocal) {
         if (resultLocal != null) {
-          //print(config.getBool(localNotifyKey));
           setState(() {
             notificationValLocal = resultLocal;
             config.appConfig.update(localNotifyKey, (bool) => resultLocal);
           });
-          //GlobalConfiguration().setValue(localNotifyKey, (bool) => notificationValLocal);
         } else {
           notificationValLocal = false;
         }
@@ -124,7 +119,6 @@ class _AppSettingsState extends State<AppSettings> {
                         padding: EdgeInsets.only(
                             top: width * 0.03, left: width * 0.1),
                         child: Row(
-                          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             Text(
                               "General Notifications",
@@ -154,7 +148,6 @@ class _AppSettingsState extends State<AppSettings> {
                         padding: EdgeInsets.only(
                             top: width * 0.03, left: width * 0.1),
                         child: Row(
-                          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             Text(
                               "Favourites List Notifications",
@@ -215,7 +208,6 @@ class _AppSettingsState extends State<AppSettings> {
                       Column(
                         children: <Widget>[
                           Row(
-                            //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: <Widget>[
                               Padding(
                                 padding: EdgeInsets.only(left: width / 6),
