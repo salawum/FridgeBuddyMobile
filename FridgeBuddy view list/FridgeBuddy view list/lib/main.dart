@@ -11,7 +11,9 @@ void main(){
   GlobalConfiguration().loadFromMap(appSettings);
   runApp(new MaterialApp(
     debugShowCheckedModeBanner: false,
-    home: new LoadScreen(),
+    home: SafeArea(
+        child: new LoadScreen()
+    ),
     routes: {
       'landing': (BuildContext context) => LoadScreen(),
       '/home': (BuildContext context) => MyHomePage(),
